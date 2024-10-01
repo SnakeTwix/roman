@@ -1,13 +1,13 @@
 package commands
 
 import (
-	"camar/enum"
 	"fmt"
 	"github.com/disgoorg/disgo/discord"
 	"github.com/disgoorg/disgo/events"
 	"github.com/disgoorg/disgo/rest"
 	"github.com/disgoorg/snowflake/v2"
 	"log"
+	"roman/enum"
 	"strings"
 )
 

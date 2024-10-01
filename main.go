@@ -1,10 +1,6 @@
 package main
 
 import (
-	"camar/commands"
-	"camar/enum"
-	"camar/env"
-	"camar/util"
 	"context"
 	"github.com/disgoorg/disgo"
 	"github.com/disgoorg/disgo/bot"
@@ -17,6 +13,10 @@ import (
 	"log/slog"
 	"os"
 	"os/signal"
+	"roman/commands"
+	"roman/enum"
+	"roman/env"
+	"roman/util"
 	"strconv"
 	"strings"
 	"syscall"

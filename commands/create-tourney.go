@@ -1,7 +1,6 @@
 package commands
 
 import (
-	"camar/enum"
 	"fmt"
 	"github.com/disgoorg/disgo/discord"
 	"github.com/disgoorg/disgo/events"
@@ -9,6 +8,7 @@ import (
 	"github.com/disgoorg/json"
 	"github.com/disgoorg/snowflake/v2"
 	"log"
+	"roman/enum"
 )
 
 type CreateTourney struct {
