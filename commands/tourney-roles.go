@@ -5,9 +5,8 @@ import (
 	"github.com/disgoorg/disgo/discord"
 	"github.com/disgoorg/disgo/events"
 	"github.com/disgoorg/disgo/rest"
-	"github.com/disgoorg/snowflake/v2"
 	"log"
-	"roman/enum"
+	"roman/util"
 	"strings"
 )
 
@@ -15,15 +14,16 @@ type TourneyRoles struct{}
 
 func (c TourneyRoles) Handler(e *events.ComponentInteractionCreate) error {
 	data := e.UserSelectMenuInteractionData()
+	roleId, _ := util.ParseUserSelectId(data.CustomID())
+
 	guildId := *e.GuildID()
-	roleId, _ := strings.CutPrefix(data.CustomID(), enum.SelectMenuUserRolesId)
 	members := rest.NewMembers(e.Client().Rest())
 
 	var message strings.Builder
 	message.WriteString("Selected users: ")
 
 	for _, user := range data.Users() {
-		err := members.AddMemberRole(guildId, user.ID, snowflake.MustParse(roleId))
+		err := members.AddMemberRole(guildId, user.ID, roleId)
 		if err != nil {
 			log.Printf("Couldn't add role to user: %s %v", user.Username, err)
 			return err

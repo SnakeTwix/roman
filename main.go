@@ -93,5 +93,4 @@ func onInteractionComponent(e *events.ComponentInteractionCreate) {
 	if err != nil {
 		e.Client().Logger().Error("error on sending response", slog.Any("err", err))
 	}
-
 }

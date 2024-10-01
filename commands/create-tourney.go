@@ -8,7 +8,7 @@ import (
 	"github.com/disgoorg/json"
 	"github.com/disgoorg/snowflake/v2"
 	"log"
-	"roman/enum"
+	"roman/util"
 )
 
 type CreateTourney struct {
@@ -75,12 +75,13 @@ func (c CreateTourney) Handler(e *events.ApplicationCommandInteractionCreate) er
 		return err
 	}
 
-	selectMenu := discord.NewUserSelectMenu(fmt.Sprintf("%s%d", enum.SelectMenuUserRolesId, role.ID), "Select users").
+	selectMenu := discord.NewUserSelectMenu(util.CreateUserSelectId(role.ID, e.User().ID), "Select users").
 		WithMinValues(2).
 		WithMaxValues(12)
 
 	message := discord.NewMessageCreateBuilder().
 		AddActionRow(selectMenu).
+		SetEphemeral(true).
 		Build()
 
 	return e.CreateMessage(message)
