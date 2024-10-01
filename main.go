@@ -2,11 +2,13 @@ package main
 
 import (
 	"camar/commands"
+	"camar/enum"
 	"camar/env"
 	"camar/util"
 	"context"
 	"github.com/disgoorg/disgo"
 	"github.com/disgoorg/disgo/bot"
+	"github.com/disgoorg/disgo/discord"
 	"github.com/disgoorg/disgo/events"
 	"github.com/disgoorg/disgo/gateway"
 	"github.com/disgoorg/snowflake/v2"
@@ -16,6 +18,7 @@ import (
 	"os"
 	"os/signal"
 	"strconv"
+	"strings"
 	"syscall"
 )
 
@@ -36,6 +39,7 @@ func main() {
 				gateway.IntentGuildMessageReactions,
 			)),
 		bot.WithEventListenerFunc(onSlashCommand),
+		bot.WithEventListenerFunc(onInteractionComponent),
 	)
 	if err != nil {
 		log.Fatalf("Couldn't create bot client: %v\r\n", err)
@@ -59,14 +63,35 @@ func main() {
 
 func onSlashCommand(e *events.ApplicationCommandInteractionCreate) {
 	data := e.SlashCommandInteractionData()
+	log.Println("Command used:", data.CommandName())
 
 	var err error
 	switch data.CommandName() {
 	case commands.NamePing:
-		err = commands.Ping(e)
+		err = commands.Ping{}.Handler(e)
+		break
+	case commands.NameCreateTourney:
+		err = commands.CreateTourney{}.Handler(e)
+		break
+	default:
+		message := discord.NewMessageCreateBuilder().SetContent("Как ты сюда добрался??").Build()
+		err = e.CreateMessage(message)
 	}
 
 	if err != nil {
 		e.Client().Logger().Error("error on sending response", slog.Any("err", err))
 	}
+}
+
+func onInteractionComponent(e *events.ComponentInteractionCreate) {
+	var err error
+
+	if strings.HasPrefix(e.Data.CustomID(), enum.SelectMenuUserRolesId) {
+		err = commands.TourneyRoles{}.Handler(e)
+	}
+
+	if err != nil {
+		e.Client().Logger().Error("error on sending response", slog.Any("err", err))
+	}
+
 }

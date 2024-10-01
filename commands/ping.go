@@ -5,16 +5,18 @@ import (
 	"github.com/disgoorg/disgo/events"
 )
 
-var ping = discord.SlashCommandCreate{
-	Name:        NamePing,
-	Description: "pong",
+type Ping struct{}
+
+func (c Ping) Info() discord.SlashCommandCreate {
+	return discord.SlashCommandCreate{
+		Name:        NamePing,
+		Description: "pong",
+	}
 }
 
-func Ping(e *events.ApplicationCommandInteractionCreate) error {
-	_ = e.SlashCommandInteractionData()
-
+func (c Ping) Handler(e *events.ApplicationCommandInteractionCreate) error {
 	message := discord.NewMessageCreateBuilder().
-		SetContent("pong").
+		SetContent("это тут или че").
 		Build()
 
 	return e.CreateMessage(message)
