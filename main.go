@@ -14,8 +14,8 @@ import (
 	"os"
 	"os/signal"
 	"roman/commands"
-	"roman/enum"
 	"roman/env"
+	romanEvents "roman/events"
 	"roman/util"
 	"strconv"
 	"strings"
@@ -46,7 +46,12 @@ func main() {
 	}
 	defer client.Close(context.TODO())
 
-	if _, err = client.Rest().SetGuildCommands(client.ApplicationID(), snowflake.ID(guildID), commands.GetAll()); err != nil {
+	var discordCommands []discord.ApplicationCommandCreate
+	for _, value := range commands.GetAll() {
+		discordCommands = append(discordCommands, value.Info())
+	}
+
+	if _, err = client.Rest().SetGuildCommands(client.ApplicationID(), snowflake.ID(guildID), discordCommands); err != nil {
 		log.Fatal("error while registering commands", err)
 	}
 
@@ -65,17 +70,18 @@ func onSlashCommand(e *events.ApplicationCommandInteractionCreate) {
 	data := e.SlashCommandInteractionData()
 	log.Println("Command used:", data.CommandName())
 
+	registeredCommands := commands.GetAll()
+
 	var err error
-	switch data.CommandName() {
-	case commands.NamePing:
-		err = commands.Ping{}.Handler(e)
-		break
-	case commands.NameCreateTourney:
-		err = commands.CreateTourney{}.Handler(e)
-		break
-	default:
+
+	// Honestly, kinda sketch. Wonder if separating the commands in their own packages is a better solution overall.
+	// Have no idea how this would work multithreaded, which would be the ideal implementation
+	command, ok := registeredCommands[data.CommandName()]
+	if !ok {
 		message := discord.NewMessageCreateBuilder().SetContent("Как ты сюда добрался??").Build()
 		err = e.CreateMessage(message)
+	} else {
+		err = command.Handler(e)
 	}
 
 	if err != nil {
@@ -84,10 +90,17 @@ func onSlashCommand(e *events.ApplicationCommandInteractionCreate) {
 }
 
 func onInteractionComponent(e *events.ComponentInteractionCreate) {
-	var err error
+	registeredEvents := romanEvents.GetAll()
+	currentEventName := strings.Split(e.Data.CustomID(), "-")[0]
 
-	if strings.HasPrefix(e.Data.CustomID(), enum.SelectMenuUserRolesId) {
-		err = commands.TourneyRoles{}.Handler(e)
+	var err error
+	event, ok := registeredEvents[currentEventName]
+	if !ok {
+		log.Println("couldn't find event name:", currentEventName)
+		message := discord.NewMessageCreateBuilder().SetContent("Couldn't find event name").Build()
+		err = e.CreateMessage(message)
+	} else {
+		err = event.Handler(e)
 	}
 
 	if err != nil {

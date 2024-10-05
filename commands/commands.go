@@ -5,12 +5,13 @@ import (
 	"github.com/disgoorg/disgo/events"
 )
 
-func GetAll() []discord.ApplicationCommandCreate {
-	commands := []discord.ApplicationCommandCreate{
-		Ping{}.Info(),
-		CreateTourney{}.Info(),
-	}
+var commands = map[string]Command{
+	NamePing:          Ping{},
+	NameCreateTourney: CreateTourney{},
+}
 
+func GetAll() map[string]Command {
+	// uhh, add init logic if it ever needs to happen. Overall, this is fine currently
 	return commands
 }
 

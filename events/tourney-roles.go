@@ -1,9 +1,10 @@
-package commands
+package events
 
 import (
+	"errors"
 	"fmt"
 	"github.com/disgoorg/disgo/discord"
-	"github.com/disgoorg/disgo/events"
+	discordEvents "github.com/disgoorg/disgo/events"
 	"github.com/disgoorg/disgo/rest"
 	"log"
 	"roman/util"
@@ -12,12 +13,17 @@ import (
 
 type TourneyRoles struct{}
 
-func (c TourneyRoles) Handler(e *events.ComponentInteractionCreate) error {
-	data := e.UserSelectMenuInteractionData()
+func (c TourneyRoles) Handler(e any) error {
+	interaction, ok := e.(*discordEvents.ComponentInteractionCreate)
+	if !ok {
+		return errors.New("wrong event data")
+	}
+
+	data := interaction.UserSelectMenuInteractionData()
 	roleId, _ := util.ParseUserSelectId(data.CustomID())
 
-	guildId := *e.GuildID()
-	members := rest.NewMembers(e.Client().Rest())
+	guildId := *interaction.GuildID()
+	members := rest.NewMembers(interaction.Client().Rest())
 
 	var message strings.Builder
 	message.WriteString("Selected users: ")
@@ -35,5 +41,5 @@ func (c TourneyRoles) Handler(e *events.ComponentInteractionCreate) error {
 
 	discordMessage := discord.NewMessageCreateBuilder().SetContent(message.String()).Build()
 
-	return e.CreateMessage(discordMessage)
+	return interaction.CreateMessage(discordMessage)
 }
