@@ -11,9 +11,7 @@ import (
 	"roman/util"
 )
 
-type CreateTourney struct {
-	info discord.SlashCommandCreate
-}
+type CreateTourney struct{}
 
 func (c CreateTourney) Info() discord.SlashCommandCreate {
 	return discord.SlashCommandCreate{

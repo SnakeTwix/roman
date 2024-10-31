@@ -8,6 +8,7 @@ import (
 var commands = map[string]Command{
 	NamePing:          Ping{},
 	NameCreateTourney: CreateTourney{},
+	NameParseLobby:    ParseLobby{},
 }
 
 func GetAll() map[string]Command {
@@ -23,4 +24,5 @@ type Command interface {
 const (
 	NamePing          = "ping"
 	NameCreateTourney = "create-tourney"
+	NameParseLobby    = "parse-lobby"
 )
