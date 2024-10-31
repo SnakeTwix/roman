@@ -3,7 +3,7 @@ module roman
 go 1.23.2
 
 require (
-	github.com/SnakeTwix/gosu-api v0.0.0-20241031025503-4e46d5a041c0
+	github.com/SnakeTwix/gosu-api v0.0.0-20241031173245-58c40eb5705c
 	github.com/disgoorg/disgo v0.18.12
 	github.com/disgoorg/json v1.2.0
 	github.com/disgoorg/snowflake/v2 v2.0.3

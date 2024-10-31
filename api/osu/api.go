@@ -22,13 +22,11 @@ func GetClient() *api.Client {
 
 	apiKey := util.GetEnv(env.OSU_API_KEY)
 
-	client := api.New(clientId, apiKey)
-	osuClient = &client
-
-	err = osuClient.GetToken()
+	client, err := api.NewClient(clientId, apiKey)
 	if err != nil {
 		log.Fatalf("Couldn't get a token: %s\n", err)
 	}
 
+	osuClient = &client
 	return osuClient
 }
