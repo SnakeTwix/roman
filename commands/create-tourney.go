@@ -5,7 +5,6 @@ import (
 	"github.com/disgoorg/disgo/discord"
 	"github.com/disgoorg/disgo/events"
 	"github.com/disgoorg/disgo/rest"
-	"github.com/disgoorg/json"
 	"github.com/disgoorg/snowflake/v2"
 	"log"
 	"roman/util"
@@ -28,7 +27,6 @@ func (c CreateTourney) Info() discord.SlashCommandCreate {
 				Description: "Name of the team",
 			},
 		},
-		DefaultMemberPermissions: json.NewNullablePtr(discord.PermissionAdministrator),
 	}
 }
 
