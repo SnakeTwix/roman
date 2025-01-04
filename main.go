@@ -134,30 +134,3 @@ func onInteractionComponent(e *events.ComponentInteractionCreate) {
 		e.Client().Logger().Error(err.DisplayError(), slog.Any("err", err))
 	}
 }
-
-//func main() {
-//	err := util.NewError("[main]", errors.New("test error"))
-//	err.AddErrorCase(errors.New("not sure when this gets displayed"))
-//	fmt.Println(err)
-//
-//	err = test()
-//	fmt.Println(err)
-//}
-//
-//func test() util.RomanError {
-//	var err util.RomanError
-//	defer func() {
-//		err.WriteCurrentContext("[test]")
-//	}()
-//
-//	err = innerTest()
-//	err.AddErrorCase(errors.New("stuff happened"))
-//
-//	return err
-//}
-//
-//func innerTest() util.RomanError {
-//	var err = util.NewError("[innerTest]", errors.New("failed :("))
-//
-//	return err
-//}
