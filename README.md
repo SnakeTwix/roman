@@ -15,4 +15,4 @@ OSU_CLIENT_SECRET=ClientSecretFromOsu
 
 ## TODO
 
-- Архивирование мб
+- Birthdays
