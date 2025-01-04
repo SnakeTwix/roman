@@ -30,7 +30,7 @@ func (c TourneyRoles) Handler(e any) util.RomanError {
 	for _, user := range data.Users() {
 		err := members.AddMemberRole(guildId, user.ID, roleId)
 
-		// TODO: Don't abort on failing to add a role. Trying adding roles to all the remaining users and notify when a user fails to get a role
+		// TODO: Don't abort on failing to add a role. Try adding roles to all the remaining users and notify when a user fails to get a role
 		if err != nil {
 			errMessage := fmt.Sprintf("Couldn't add role to user: %s. Stopping Process", user.Username)
 			return util.NewErrorWithDisplay("[TourneyRoles Handler]", err, errMessage)
