@@ -92,7 +92,6 @@ func onSlashCommand(e *events.ApplicationCommandInteractionCreate) {
 		err = command.Handler(e)
 	}
 
-	// TODO: Introduce a custom error component and send message based on the error gotten from command
 	if err != nil {
 		message := discord.NewMessageCreateBuilder().
 			SetContent(err.DisplayError()).
