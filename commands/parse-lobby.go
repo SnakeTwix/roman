@@ -5,8 +5,8 @@ import (
 	"github.com/SnakeTwix/gosu-api/structs"
 	"github.com/disgoorg/disgo/discord"
 	"github.com/disgoorg/disgo/events"
-	"log"
 	"roman/api/osu"
+	"roman/util"
 	"strconv"
 	"strings"
 )
@@ -27,7 +27,7 @@ func (c ParseLobby) Info() discord.SlashCommandCreate {
 	}
 }
 
-func (c ParseLobby) Handler(e *events.ApplicationCommandInteractionCreate) error {
+func (c ParseLobby) Handler(e *events.ApplicationCommandInteractionCreate) util.RomanError {
 	data := e.SlashCommandInteractionData()
 	lobbyLink := data.String("lobby_link")
 	linkSplit := strings.Split(lobbyLink, "/")
@@ -35,15 +35,13 @@ func (c ParseLobby) Handler(e *events.ApplicationCommandInteractionCreate) error
 
 	lobbyId, err := strconv.Atoi(lobbyIdString)
 	if err != nil {
-		log.Println("Couldn't convert lobby id to integer")
-		return errors.New("couldn't convert lobby id to integer")
+		return util.NewErrorWithDisplay("[ParseLobby Handler]", errors.New("couldn't convert lobby id to integer"), "Couldn't parse lobby id")
 	}
 
 	osuApi := osu.GetClient()
 	matchData, err := osuApi.GetFullMatch(lobbyId)
 	if matchData == nil {
-		log.Println("No matchData returned")
-		return errors.New("couldn't read match data for lobby")
+		return util.NewErrorWithDisplay("[ParseLobby Handler]", err, "Couldn't fetch Match data")
 	}
 
 	type scoreData struct {
@@ -114,5 +112,5 @@ func (c ParseLobby) Handler(e *events.ApplicationCommandInteractionCreate) error
 		SetContent(builder.String()).
 		Build()
 
-	return e.CreateMessage(message)
+	return util.NewErrorWithDisplay("[ParseLobby Handler]", e.CreateMessage(message), "Failed to lobby stats")
 }

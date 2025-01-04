@@ -76,46 +76,89 @@ func onSlashCommand(e *events.ApplicationCommandInteractionCreate) {
 	log.Println("Command used:", data.CommandName())
 
 	// Should probably introduce an api so that I don't have to interact with the inner components
+	// 2025.01.04: Guess I did realize?
 	registeredCommands := commands.GetAll()
 
-	var err error
+	var err util.RomanError
 
 	// Honestly, kinda sketch. Wonder if separating the commands in their own packages is a better solution overall.
-	// Have no idea how this would work multithreaded, which would be the ideal implementation
 	// 2024.12.20: TODO: Coming back to this, not sure why I didn't realize, but just like a .Get() method is the way to go
 	command, ok := registeredCommands[data.CommandName()]
 	if !ok {
 		// This path shouldn't really happen, but in case there are discord shenanigans
-		message := discord.NewMessageCreateBuilder().SetContent("Как ты сюда добрался??").Build()
-		err = e.CreateMessage(message)
+		message := discord.NewMessageCreateBuilder().SetContent("Как я отправляю это сообщение?").Build()
+		err = util.NewError("[onSlashCommand]", e.CreateMessage(message))
 	} else {
 		err = command.Handler(e)
 	}
 
 	// TODO: Introduce a custom error component and send message based on the error gotten from command
 	if err != nil {
-		e.Client().Logger().Error("error on sending response", slog.Any("err", err))
+		message := discord.NewMessageCreateBuilder().
+			SetContent(err.DisplayError()).
+			Build()
+
+		// Don't feel like handling error fallback messages.
+		// if THIS fails, might as well just kms
+		_ = e.CreateMessage(message)
+
+		e.Client().Logger().Error(err.DisplayError(), slog.Any("err", err))
 	}
 }
 
-// onInteractionComponent uhh not sure what this fires on exactly, but technically just button pressed on embeds
+// onInteractionComponent uhh not sure what this fires on exactly, but so far just button presses on embeds
 func onInteractionComponent(e *events.ComponentInteractionCreate) {
 	// Since this is for buttons, they all have their own "id" system.
-	// The way it's handled currently I assign an event i.e. usersRoles and an id at the end so that it's trackable
+	// The way it's handled currently an event is assigned i.e. usersRoles and an id at the end so that it's trackable
 	registeredEvents := romanEvents.GetAll()
 	currentEventName := strings.Split(e.Data.CustomID(), "-")[0]
 
-	var err error
+	var err util.RomanError
 	event, ok := registeredEvents[currentEventName]
 	if !ok {
 		log.Println("couldn't find event name:", currentEventName)
 		message := discord.NewMessageCreateBuilder().SetContent("Couldn't find event name").Build()
-		err = e.CreateMessage(message)
+		err = util.NewError("[onInteractionComponent]", e.CreateMessage(message))
 	} else {
 		err = event.Handler(e)
 	}
 
 	if err != nil {
-		e.Client().Logger().Error("error on sending response", slog.Any("err", err))
+		message := discord.NewMessageCreateBuilder().
+			SetContent(err.DisplayError()).
+			Build()
+
+		// Don't feel like handling error fallback messages.
+		// if THIS fails, might as well just kms
+		_ = e.CreateMessage(message)
+
+		e.Client().Logger().Error(err.DisplayError(), slog.Any("err", err))
 	}
 }
+
+//func main() {
+//	err := util.NewError("[main]", errors.New("test error"))
+//	err.AddErrorCase(errors.New("not sure when this gets displayed"))
+//	fmt.Println(err)
+//
+//	err = test()
+//	fmt.Println(err)
+//}
+//
+//func test() util.RomanError {
+//	var err util.RomanError
+//	defer func() {
+//		err.WriteCurrentContext("[test]")
+//	}()
+//
+//	err = innerTest()
+//	err.AddErrorCase(errors.New("stuff happened"))
+//
+//	return err
+//}
+//
+//func innerTest() util.RomanError {
+//	var err = util.NewError("[innerTest]", errors.New("failed :("))
+//
+//	return err
+//}

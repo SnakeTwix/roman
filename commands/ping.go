@@ -3,6 +3,7 @@ package commands
 import (
 	"github.com/disgoorg/disgo/discord"
 	"github.com/disgoorg/disgo/events"
+	"roman/util"
 )
 
 type Ping struct{}
@@ -14,10 +15,10 @@ func (c Ping) Info() discord.SlashCommandCreate {
 	}
 }
 
-func (c Ping) Handler(e *events.ApplicationCommandInteractionCreate) error {
+func (c Ping) Handler(e *events.ApplicationCommandInteractionCreate) util.RomanError {
 	message := discord.NewMessageCreateBuilder().
-		SetContent("это тут или че").
+		SetContent("Pong!").
 		Build()
 
-	return e.CreateMessage(message)
+	return util.NewErrorWithDisplay("[Ping Handler]", e.CreateMessage(message), "Couldn't ping :frowning: ")
 }

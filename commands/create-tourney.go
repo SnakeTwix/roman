@@ -1,6 +1,7 @@
 package commands
 
 import (
+	"errors"
 	"fmt"
 	"github.com/disgoorg/disgo/discord"
 	"github.com/disgoorg/disgo/events"
@@ -30,7 +31,7 @@ func (c CreateTourney) Info() discord.SlashCommandCreate {
 	}
 }
 
-func (c CreateTourney) Handler(e *events.ApplicationCommandInteractionCreate) error {
+func (c CreateTourney) Handler(e *events.ApplicationCommandInteractionCreate) util.RomanError {
 	data := e.SlashCommandInteractionData()
 	tourneyName := data.String("tourney_name")
 	teamName := data.String("team_name")
@@ -38,17 +39,32 @@ func (c CreateTourney) Handler(e *events.ApplicationCommandInteractionCreate) er
 	guilds := rest.NewGuilds(e.Client().Rest())
 	guildId := *e.GuildID()
 
-	guildChannels, err := guilds.GetGuildChannels(guildId)
-	if err != nil {
-		log.Println("Failed to fetch guild channels", err)
-		return err
+	guildChannels, baseErr := guilds.GetGuildChannels(guildId)
+	if baseErr != nil {
+		return util.NewErrorWithDisplay("[CreateTourney Handler]", baseErr, "Failed to fetch guild channels")
 	}
+
+	var err util.RomanError
+	// Set the context at the end of the function when stuff exits
+	defer func() {
+		if err != nil {
+			err.WriteCurrentContext("[CreateTourney Handler]")
+		}
+	}()
 
 	// Role creation
 	role, err := c.createRole(guilds, guildId, tourneyName, teamName)
+	if err != nil {
+		err.AddErrorCase(errors.New("role creation"))
+		return err
+	}
 
 	// Category creation
 	category, err := c.createCategory(guilds, guildId, guildChannels, role, tourneyName)
+	if err != nil {
+		err.AddErrorCase(errors.New("category creation"))
+		return err
+	}
 
 	// Channel creation
 	_, err = c.createTextChannel(guilds, guildId, category, tourneyName, "links", 1)
@@ -80,10 +96,10 @@ func (c CreateTourney) Handler(e *events.ApplicationCommandInteractionCreate) er
 		SetEphemeral(true).
 		Build()
 
-	return e.CreateMessage(message)
+	return util.NewErrorWithDisplay("[CreateTourney Handler]", e.CreateMessage(message), "Failed to send select menu for players")
 }
 
-func (c CreateTourney) createRole(guilds rest.Guilds, guildId snowflake.ID, tourneyName string, teamName string) (*discord.Role, error) {
+func (c CreateTourney) createRole(guilds rest.Guilds, guildId snowflake.ID, tourneyName string, teamName string) (*discord.Role, util.RomanError) {
 	var roleName = tourneyName
 	if teamName != "" {
 		roleName = fmt.Sprintf("%s | %s", tourneyName, teamName)
@@ -97,15 +113,14 @@ func (c CreateTourney) createRole(guilds rest.Guilds, guildId snowflake.ID, tour
 	role, err := guilds.CreateRole(guildId, createRole)
 
 	if err != nil {
-		log.Println("Couldn't create role:", roleName, err)
-		return nil, err
+		return nil, util.NewErrorWithDisplay("[createRole]", err, fmt.Sprintf("Couldn't create role: `%s`", roleName))
 	}
 
-	return role, err
+	return role, nil
 
 }
 
-func (c CreateTourney) createCategory(guilds rest.Guilds, guildId snowflake.ID, guildChannels []discord.GuildChannel, categoryRole *discord.Role, tourneyName string) (discord.GuildChannel, error) {
+func (c CreateTourney) createCategory(guilds rest.Guilds, guildId snowflake.ID, guildChannels []discord.GuildChannel, categoryRole *discord.Role, tourneyName string) (discord.GuildChannel, util.RomanError) {
 	var categoryName = tourneyName
 
 	log.Println("Creating category:", categoryName)
@@ -138,14 +153,13 @@ func (c CreateTourney) createCategory(guilds rest.Guilds, guildId snowflake.ID, 
 
 	category, err := guilds.CreateGuildChannel(guildId, guildCategoryCreate)
 	if err != nil {
-		log.Println("Couldn't create category:", categoryName, err)
-		return nil, err
+		return nil, util.NewErrorWithDisplay("[createCategory]", err, fmt.Sprintf("Couldn't create category: `%s`", categoryName))
 	}
 
-	return category, err
+	return category, nil
 }
 
-func (c CreateTourney) createTextChannel(guilds rest.Guilds, guildId snowflake.ID, category discord.GuildChannel, tourneyName string, subName string, position int) (*discord.GuildChannel, error) {
+func (c CreateTourney) createTextChannel(guilds rest.Guilds, guildId snowflake.ID, category discord.GuildChannel, tourneyName string, subName string, position int) (*discord.GuildChannel, util.RomanError) {
 	var channelName = fmt.Sprintf("%s-%s", tourneyName, subName)
 
 	log.Println("Creating channel:", channelName)
@@ -157,14 +171,13 @@ func (c CreateTourney) createTextChannel(guilds rest.Guilds, guildId snowflake.I
 
 	channel, err := guilds.CreateGuildChannel(guildId, guildChannelCreate)
 	if err != nil {
-		log.Println("Couldn't create channel:", channelName, err)
-		return nil, err
+		return nil, util.NewErrorWithDisplay("[createTextChannel]", err, fmt.Sprintf("Couldn't create text channel: `%s`", channelName))
 	}
 
-	return &channel, err
+	return &channel, nil
 }
 
-func (c CreateTourney) createVoiceChannel(guilds rest.Guilds, guildId snowflake.ID, category discord.GuildChannel, tourneyName string, position int) (*discord.GuildChannel, error) {
+func (c CreateTourney) createVoiceChannel(guilds rest.Guilds, guildId snowflake.ID, category discord.GuildChannel, tourneyName string, position int) (*discord.GuildChannel, util.RomanError) {
 	var channelName = fmt.Sprintf("%s-voice", tourneyName)
 
 	log.Println("Creating voice:", channelName)
@@ -176,9 +189,8 @@ func (c CreateTourney) createVoiceChannel(guilds rest.Guilds, guildId snowflake.
 
 	channel, err := guilds.CreateGuildChannel(guildId, guildChannelCreate)
 	if err != nil {
-		log.Println("Couldn't create voice:", channelName, err)
-		return nil, err
+		return nil, util.NewErrorWithDisplay("[createVoiceChannel]", err, fmt.Sprintf("Couldn't create voice: `%s`", channelName))
 	}
 
-	return &channel, err
+	return &channel, nil
 }

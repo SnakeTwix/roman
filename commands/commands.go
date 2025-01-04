@@ -3,6 +3,7 @@ package commands
 import (
 	"github.com/disgoorg/disgo/discord"
 	"github.com/disgoorg/disgo/events"
+	"roman/util"
 )
 
 var commands = map[string]Command{
@@ -18,7 +19,7 @@ func GetAll() map[string]Command {
 
 type Command interface {
 	Info() discord.SlashCommandCreate
-	Handler(*events.ApplicationCommandInteractionCreate) error
+	Handler(*events.ApplicationCommandInteractionCreate) util.RomanError
 }
 
 const (

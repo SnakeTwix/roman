@@ -6,17 +6,16 @@ import (
 	"github.com/disgoorg/disgo/discord"
 	discordEvents "github.com/disgoorg/disgo/events"
 	"github.com/disgoorg/disgo/rest"
-	"log"
 	"roman/util"
 	"strings"
 )
 
 type TourneyRoles struct{}
 
-func (c TourneyRoles) Handler(e any) error {
+func (c TourneyRoles) Handler(e any) util.RomanError {
 	interaction, ok := e.(*discordEvents.ComponentInteractionCreate)
 	if !ok {
-		return errors.New("wrong event data")
+		return util.NewErrorWithDisplay("[TourneyRoles Handler]", errors.New("failed to convert discord event to ComponentInteractionCreate"), "Couldn't find embed")
 	}
 
 	data := interaction.UserSelectMenuInteractionData()
@@ -30,16 +29,19 @@ func (c TourneyRoles) Handler(e any) error {
 
 	for _, user := range data.Users() {
 		err := members.AddMemberRole(guildId, user.ID, roleId)
+
+		// TODO: Don't abort on failing to add a role. Trying adding roles to all the remaining users and notify when a user fails to get a role
 		if err != nil {
-			log.Printf("Couldn't add role to user: %s %v", user.Username, err)
-			return err
+			errMessage := fmt.Sprintf("Couldn't add role to user: %s. Stopping Process", user.Username)
+			return util.NewErrorWithDisplay("[TourneyRoles Handler]", err, errMessage)
 		}
 
 		message.WriteString(fmt.Sprintf("<@%d>", user.ID))
-		message.WriteString(" ")
+		message.WriteString("")
 	}
 
+	message.WriteString(": You've been added to a team!")
 	discordMessage := discord.NewMessageCreateBuilder().SetContent(message.String()).Build()
 
-	return interaction.CreateMessage(discordMessage)
+	return util.NewErrorWithDisplay("[TourneyRoles Handler]", interaction.CreateMessage(discordMessage), "Failed to send message")
 }

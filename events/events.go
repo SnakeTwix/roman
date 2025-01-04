@@ -2,6 +2,7 @@ package events
 
 import (
 	"roman/enum"
+	"roman/util"
 )
 
 var events = map[string]Event{
@@ -13,7 +14,14 @@ func GetAll() map[string]Event {
 	return events
 }
 
+//func Get(name string) (Event, error) {
+//	event, ok := events[name]
+//	if !ok {
+//
+//	}
+//}
+
 type Event interface {
 	// Handler generalizing is kind of impossible here. Handlers should check what event they get themselves
-	Handler(event any) error
+	Handler(event any) util.RomanError
 }
