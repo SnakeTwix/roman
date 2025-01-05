@@ -65,12 +65,14 @@ func (b *BirthdayRepo) GetBirthdaysFromDate(date uint, maxAmount uint) ([]port.B
 		portBirthdays = append(portBirthdays, portBirthday)
 	}
 
-	if len(modelBirthdays) < int(maxAmount) {
-		modelBirthdays = modelBirthdays[:0]
-		err = b.db.Limit(int(maxAmount)-len(modelBirthdays)).Order("birthday_date ASC, discord_id ASC").Where("birthday_date < ?", date).Find(&modelBirthdays).Error
-		if err != nil {
-			return nil, util.NewErrorWithDisplay("[BirthdayRepo GetBirthdayFromDate]", err, "Error when retrieving birthdays")
-		}
+	if !(len(modelBirthdays) < int(maxAmount)) {
+		return portBirthdays, nil
+	}
+
+	modelBirthdays = modelBirthdays[:0]
+	err = b.db.Limit(int(maxAmount)-len(modelBirthdays)).Order("birthday_date ASC, discord_id ASC").Where("birthday_date < ?", date).Find(&modelBirthdays).Error
+	if err != nil {
+		return nil, util.NewErrorWithDisplay("[BirthdayRepo GetBirthdayFromDate]", err, "Error when retrieving birthdays")
 	}
 
 	for _, birthday := range modelBirthdays {
