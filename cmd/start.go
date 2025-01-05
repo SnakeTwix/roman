@@ -7,6 +7,7 @@ import (
 	"os/signal"
 	"roman/api/osu"
 	"roman/commands"
+	"roman/repo"
 	"roman/service"
 	"syscall"
 )
@@ -14,9 +15,14 @@ import (
 func Start() {
 	configService := service.NewConfigService()
 
+	db := repo.InitDB(configService)
+
+	birthdayRepo := repo.NewBirthdayRepo(db)
+
+	birthdayService := service.NewBirthdayService(birthdayRepo)
 	osuApi := osu.GetClient(configService)
 
-	discordCommands := commands.Init(osuApi)
+	discordCommands := commands.Init(osuApi, birthdayService)
 	discordBot := InitBot(configService, discordCommands)
 
 	defer discordBot.client.Close(context.TODO())

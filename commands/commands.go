@@ -4,6 +4,7 @@ import (
 	api "github.com/SnakeTwix/gosu-api"
 	"github.com/disgoorg/disgo/discord"
 	"github.com/disgoorg/disgo/events"
+	"roman/port"
 	"roman/util"
 )
 
@@ -11,7 +12,7 @@ type Commands struct {
 	commands map[string]Command
 }
 
-func Init(osuApi *api.Client) *Commands {
+func Init(osuApi *api.Client, birthdayService port.BirthdayService) *Commands {
 	manager := Commands{}
 
 	commands := map[string]Command{
@@ -20,6 +21,12 @@ func Init(osuApi *api.Client) *Commands {
 		NameParseLobby: ParseLobby{
 			// TODO: Add ports for future mocking
 			osuApi: osuApi,
+		},
+		NameSetBd: SetBd{
+			birthdayService: birthdayService,
+		},
+		NameNearBd: NearBd{
+			birthdayService: birthdayService,
 		},
 	}
 
@@ -41,4 +48,6 @@ const (
 	NamePing          = "ping"
 	NameCreateTourney = "create-tourney"
 	NameParseLobby    = "parse-lobby"
+	NameSetBd         = "set-bd"
+	NameNearBd        = "near-bd"
 )

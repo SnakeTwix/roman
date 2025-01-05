@@ -5,4 +5,5 @@ type ConfigService interface {
 	DiscordGuildId() uint64
 	OsuClientId() string
 	OsuClientSecret() string
+	SqliteDbFile() string
 }

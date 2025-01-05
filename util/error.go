@@ -1,6 +1,9 @@
 package util
 
-import "fmt"
+import (
+	"errors"
+	"fmt"
+)
 
 type RomanError interface {
 	// Error is to enforce the implementation of the Error interface of STD lib. Should return what FullError is in string format
@@ -74,7 +77,12 @@ func NewError(context string, err error) RomanError {
 	}
 
 	outErr := romanError{}
-	outErr.fullError = fmt.Errorf("%s %s", context, err)
+	outErr.fullError = fmt.Errorf("%s %w", context, err)
+
+	var romErr RomanError
+	if errors.As(err, &romErr) {
+		outErr.SetDisplayError(romErr.DisplayError())
+	}
 
 	return &outErr
 }

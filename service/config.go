@@ -11,6 +11,7 @@ type ConfigService struct {
 	discordGuildId  uint64
 	osuClientId     string
 	osuClientSecret string
+	sqliteDbFile    string
 }
 
 func (c *ConfigService) DiscordToken() string {
@@ -29,6 +30,10 @@ func (c *ConfigService) OsuClientSecret() string {
 	return c.osuClientSecret
 }
 
+func (c *ConfigService) SqliteDbFile() string {
+	return c.sqliteDbFile
+}
+
 func NewConfigService() *ConfigService {
 	guildId, _ := strconv.Atoi(util.GetEnv(env.GUILD_ID))
 
@@ -37,5 +42,6 @@ func NewConfigService() *ConfigService {
 		discordGuildId:  uint64(guildId),
 		osuClientId:     util.GetEnv(env.OSU_API_CLIENT_ID),
 		osuClientSecret: util.GetEnv(env.OSU_API_KEY),
+		sqliteDbFile:    util.GetEnv(env.SQ_LITE_DB_FILE),
 	}
 }
