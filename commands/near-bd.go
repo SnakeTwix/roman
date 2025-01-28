@@ -2,12 +2,13 @@ package commands
 
 import (
 	"fmt"
-	"github.com/disgoorg/disgo/discord"
-	"github.com/disgoorg/disgo/events"
 	"roman/port"
 	"roman/util"
 	"strings"
 	"time"
+
+	"github.com/disgoorg/disgo/discord"
+	"github.com/disgoorg/disgo/events"
 )
 
 type NearBd struct {
@@ -18,7 +19,7 @@ func (s NearBd) Handler(e *events.ApplicationCommandInteractionCreate) util.Roma
 	currentTime := time.Now()
 
 	date := uint(currentTime.Month()*100) + uint(currentTime.Day())
-	birthdays, err := s.birthdayService.GetBirthdaysFromDate(date, 10)
+	birthdays, err := s.birthdayService.GetBirthdaysFromDate(date, 100)
 	if err != nil {
 		message := discord.NewMessageCreateBuilder().
 			SetContent(err.DisplayError()).
