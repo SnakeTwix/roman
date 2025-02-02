@@ -35,7 +35,7 @@ func (j *JobHappyBirthdayGreeting) Register() util.RomanError {
 		gocron.DailyJob(1,
 			gocron.NewAtTimes(
 				gocron.NewAtTime(
-					5, 29, 0,
+					5, 0, 0,
 				),
 			),
 		),
