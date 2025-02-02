@@ -11,6 +11,11 @@ type BirthdayService struct {
 	birthdayRepo port.BirthdayRepo
 }
 
+func (b *BirthdayService) GetBirthdaysOnDate(date uint) ([]port.Birthday, util.RomanError) {
+	birthdays, err := b.birthdayRepo.GetBirthdaysOnDate(date)
+	return birthdays, err
+}
+
 func NewBirthdayService(repo port.BirthdayRepo) *BirthdayService {
 	return &BirthdayService{birthdayRepo: repo}
 }

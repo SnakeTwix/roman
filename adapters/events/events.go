@@ -1,8 +1,8 @@
 package events
 
 import (
-	"roman/enum"
 	"roman/util"
+	"roman/util/enum"
 )
 
 var events = map[string]Event{

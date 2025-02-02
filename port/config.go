@@ -6,4 +6,5 @@ type ConfigService interface {
 	OsuClientId() string
 	OsuClientSecret() string
 	SqliteDbFile() string
+	DiscordBirthdayGreetingChannelId() int
 }

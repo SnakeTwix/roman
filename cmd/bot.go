@@ -2,16 +2,15 @@ package cmd
 
 import (
 	"context"
-	"github.com/disgoorg/disgo"
 	"github.com/disgoorg/disgo/bot"
 	"github.com/disgoorg/disgo/discord"
 	"github.com/disgoorg/disgo/events"
-	"github.com/disgoorg/disgo/gateway"
 	"github.com/disgoorg/snowflake/v2"
 	"log"
 	"log/slog"
-	"roman/commands"
-	romanEvents "roman/events"
+	"roman/adapters/commands"
+	romanEvents "roman/adapters/events"
+	"roman/adapters/jobs"
 	"roman/port"
 	"roman/util"
 	"strings"
@@ -21,30 +20,23 @@ type Bot struct {
 	client        bot.Client
 	configService port.ConfigService
 	commands      *commands.Commands
+	jobs          *jobs.Jobs
 }
 
-func InitBot(config port.ConfigService, commands *commands.Commands) *Bot {
-	client, err := disgo.New(config.DiscordToken(),
-		bot.WithGatewayConfigOpts(
-			gateway.WithIntents(
-				gateway.IntentGuilds,
-				gateway.IntentGuildMessages,
-				gateway.IntentGuildMessageReactions,
-			)),
-	)
-
-	if err != nil {
-		log.Fatalf("Couldn't create bot client: %v\r\n", err)
-	}
-
+func InitBot(config port.ConfigService, client bot.Client, commands *commands.Commands, jobs *jobs.Jobs) *Bot {
 	return &Bot{
 		client:        client,
 		configService: config,
 		commands:      commands,
+		jobs:          jobs,
 	}
 }
 
 func (b *Bot) RegisterCommands() {
+	if b.commands == nil {
+		return
+	}
+
 	// Get all command description objects
 	var discordCommands []discord.ApplicationCommandCreate
 	for _, value := range b.commands.GetAll() {
@@ -61,12 +53,33 @@ func (b *Bot) RegisterListeners() {
 	b.client.EventManager().AddEventListeners(bot.NewListenerFunc(b.onInteractionComponent))
 }
 
+func (b *Bot) RegisterTimeJobs() {
+	if b.jobs == nil {
+		log.Println("Tried to register jobs, but none were provided")
+		return
+	}
+	log.Println("Registering all jobs")
+
+	for _, job := range b.jobs.GetAll() {
+		// TODO: Handle errors
+		err := job.Register()
+		if err != nil {
+			log.Println(err)
+		}
+	}
+
+	log.Println("Finished registering all jobs")
+}
+
 func (b *Bot) Start() {
 	// Register commands
 	b.RegisterCommands()
 
 	// Register listeners for commands
 	b.RegisterListeners()
+
+	// Register jobs to be performed every X amount of time
+	b.RegisterTimeJobs()
 
 	if err := b.client.OpenGateway(context.TODO()); err != nil {
 		log.Fatalf("Couldn't connect bot: %v\r\n", err)

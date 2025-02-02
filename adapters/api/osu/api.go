@@ -3,9 +3,9 @@ package osu
 import (
 	api "github.com/SnakeTwix/gosu-api"
 	"log"
-	"roman/env"
 	"roman/port"
 	"roman/util"
+	"roman/util/env"
 	"strconv"
 )
 

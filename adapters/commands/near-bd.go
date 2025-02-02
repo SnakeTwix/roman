@@ -19,7 +19,7 @@ func (s NearBd) Handler(e *events.ApplicationCommandInteractionCreate) util.Roma
 	currentTime := time.Now()
 
 	date := uint(currentTime.Month()*100) + uint(currentTime.Day())
-	birthdays, err := s.birthdayService.GetBirthdaysFromDate(date, 100)
+	birthdays, err := s.birthdayService.GetBirthdaysFromDate(date, 10)
 	if err != nil {
 		message := discord.NewMessageCreateBuilder().
 			SetContent(err.DisplayError()).
@@ -51,6 +51,14 @@ func (s NearBd) Handler(e *events.ApplicationCommandInteractionCreate) util.Roma
 		SetColor(0xDB20E8).
 		Build()
 
+	//btnPrev := discord.NewSecondaryButton("", "back-id").WithEmoji(discord.ComponentEmoji{
+	//	Name: "◀️",
+	//})
+	//
+	//btnNext := discord.NewSecondaryButton("", "forward-id").WithEmoji(discord.ComponentEmoji{
+	//	Name: "▶️",
+	//})
+
 	message := discord.NewMessageCreateBuilder().
 		SetAllowedMentions(&discord.AllowedMentions{
 			Parse:       nil,
@@ -59,8 +67,8 @@ func (s NearBd) Handler(e *events.ApplicationCommandInteractionCreate) util.Roma
 			RepliedUser: false,
 		}).
 		SetEmbeds(embed).
+		//AddActionRow(btnPrev, btnNext).
 		Build()
-
 	return util.NewErrorWithDisplay("[NearBd Handler]", e.CreateMessage(message), "Failed to send birthday list")
 }
 

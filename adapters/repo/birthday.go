@@ -2,8 +2,8 @@ package repo
 
 import (
 	"gorm.io/gorm"
+	"roman/adapters/repo/model"
 	"roman/port"
-	"roman/repo/model"
 	"roman/util"
 )
 
@@ -73,6 +73,31 @@ func (b *BirthdayRepo) GetBirthdaysFromDate(date uint, maxAmount uint) ([]port.B
 	err = b.db.Limit(int(maxAmount)-len(modelBirthdays)).Order("birthday_date ASC, discord_id ASC").Where("birthday_date < ?", date).Find(&modelBirthdays).Error
 	if err != nil {
 		return nil, util.NewErrorWithDisplay("[BirthdayRepo GetBirthdayFromDate]", err, "Error when retrieving birthdays")
+	}
+
+	for _, birthday := range modelBirthdays {
+		portBirthday := port.Birthday{
+			DiscordId: birthday.DiscordId,
+			Date:      birthday.BirthdayDate,
+		}
+
+		if birthday.BirthdayYear != nil {
+			portBirthday.BirthYear = *birthday.BirthdayYear
+		}
+
+		portBirthdays = append(portBirthdays, portBirthday)
+	}
+
+	return portBirthdays, nil
+}
+
+func (b *BirthdayRepo) GetBirthdaysOnDate(date uint) ([]port.Birthday, util.RomanError) {
+	portBirthdays := make([]port.Birthday, 0)
+	modelBirthdays := make([]model.Birthday, 0)
+
+	err := b.db.Order("discord_id ASC").Where("birthday_date = ?", date).Find(&modelBirthdays).Error
+	if err != nil {
+		return nil, util.NewErrorWithDisplay("[BirthdayRepo GetBirthdayOnDate]", err, "Error when retrieving birthdays")
 	}
 
 	for _, birthday := range modelBirthdays {

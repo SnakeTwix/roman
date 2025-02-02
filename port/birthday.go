@@ -13,9 +13,11 @@ type Birthday struct {
 type BirthdayService interface {
 	SetBd(discordId uint, date uint, year uint) util.RomanError
 	GetBirthdaysFromDate(date uint, maxAmount uint) ([]Birthday, util.RomanError)
+	GetBirthdaysOnDate(date uint) ([]Birthday, util.RomanError)
 }
 
 type BirthdayRepo interface {
 	SetBd(discordId uint, date uint, year uint) util.RomanError
 	GetBirthdaysFromDate(date uint, maxAmount uint) ([]Birthday, util.RomanError)
+	GetBirthdaysOnDate(date uint) ([]Birthday, util.RomanError)
 }

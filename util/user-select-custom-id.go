@@ -2,7 +2,7 @@ package util
 
 import (
 	"github.com/disgoorg/snowflake/v2"
-	"roman/enum"
+	"roman/util/enum"
 	"strings"
 )
 

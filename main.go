@@ -7,11 +7,12 @@ import (
 )
 
 func main() {
-	// Load env variables
+	//Load env variables
 	err := godotenv.Load()
 	if err != nil {
 		log.Fatal("Error loading .env file")
 	}
 
 	cmd.Start()
+
 }

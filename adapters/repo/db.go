@@ -4,8 +4,8 @@ import (
 	"gorm.io/driver/sqlite" // Sqlite driver based on CGO
 	"gorm.io/gorm"
 	"log"
+	"roman/adapters/repo/model"
 	"roman/port"
-	"roman/repo/model"
 )
 
 func InitDB(config port.ConfigService) *gorm.DB {
