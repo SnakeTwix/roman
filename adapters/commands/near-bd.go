@@ -19,7 +19,7 @@ func (s NearBd) Handler(e *events.ApplicationCommandInteractionCreate) util.Roma
 	currentTime := time.Now()
 
 	date := uint(currentTime.Month()*100) + uint(currentTime.Day())
-	birthdays, err := s.birthdayService.GetBirthdaysFromDate(date, 10)
+	birthdays, err := s.birthdayService.GetBirthdaysFromDate(date, 100)
 	if err != nil {
 		message := discord.NewMessageCreateBuilder().
 			SetContent(err.DisplayError()).
