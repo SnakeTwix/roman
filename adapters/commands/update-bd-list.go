@@ -53,10 +53,10 @@ func (s UpdateBdList) Handle(e any) util.RomanError {
 
 	message := interaction.Message
 	var messageContent strings.Builder
-	tomorrow := time.Date(currentTime.Year(), currentTime.Month(), currentTime.Day()+2, 0, 0, 0, 0, time.Local)
+	todayZeroed := time.Date(currentTime.Year(), currentTime.Month(), currentTime.Day(), 0, 0, 0, 0, time.Local)
 	for _, birthday := range birthdays {
 		date := time.Date(time.Now().Year(), time.Month(birthday.Date/100), int(birthday.Date%100), 12, 0, 0, 0, time.UTC)
-		if tomorrow.After(date) {
+		if todayZeroed.After(date) {
 			date = date.AddDate(1, 0, 0)
 		}
 
