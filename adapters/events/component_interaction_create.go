@@ -4,6 +4,7 @@ import (
 	"github.com/disgoorg/disgo/bot"
 	"github.com/disgoorg/disgo/discord"
 	events2 "github.com/disgoorg/disgo/events"
+	"log"
 	"log/slog"
 	"roman/adapters/commands"
 	"roman/util"
@@ -25,6 +26,7 @@ func (c *ComponentInteractionCreate) handle(e *events2.ComponentInteractionCreat
 	// The way it's handled currently a command is assigned i.e. usersRoles and an id at the end so that it's trackable
 	registeredCommands := c.AssociatedHandlers()
 	currentEventName := strings.Split(e.Data.CustomID(), "-")[0]
+	log.Println("Event received:", e.Data.CustomID())
 
 	var err util.RomanError
 	command, ok := registeredCommands[currentEventName]
