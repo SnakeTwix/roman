@@ -33,11 +33,10 @@ func (b *BirthdayRepo) SetBd(discordId uint, date uint, year uint) util.RomanErr
 	return util.NewErrorWithDisplay("[BirthdayRepo SetBd]", b.db.Save(&bd).Error, "Failed to write birthday to db")
 }
 
-func (b *BirthdayRepo) GetBirthdaysFromDate(date uint, maxAmount uint) ([]port.Birthday, util.RomanError) {
-	var amountOfBirthdays int64
-	err := b.db.Model(&model.Birthday{}).Count(&amountOfBirthdays).Error
-	if err != nil {
-		return nil, util.NewErrorWithDisplay("[BirthdayRepo GetBirthdayFromDate]", err, "Error when counting amount of birthdays")
+func (b *BirthdayRepo) GetBirthdaysFromDate(date uint, page uint, maxAmount uint) ([]port.Birthday, util.RomanError) {
+	amountOfBirthdays, romanErr := b.GetTotalBirthdayCount()
+	if romanErr != nil {
+		return nil, util.NewError("[BirthdayRepo GetBirthdayFromDate]", romanErr)
 	}
 
 	if uint(amountOfBirthdays) < maxAmount {
@@ -47,7 +46,7 @@ func (b *BirthdayRepo) GetBirthdaysFromDate(date uint, maxAmount uint) ([]port.B
 	portBirthdays := make([]port.Birthday, 0, maxAmount)
 	modelBirthdays := make([]model.Birthday, 0)
 
-	err = b.db.Limit(int(maxAmount)).Order("birthday_date ASC, discord_id ASC").Where("birthday_date >= ?", date).Find(&modelBirthdays).Error
+	err := b.db.Offset(int(maxAmount*page)).Limit(int(maxAmount)).Order("birthday_date ASC, discord_id ASC").Where("birthday_date >= ?", date).Find(&modelBirthdays).Error
 	if err != nil {
 		return nil, util.NewErrorWithDisplay("[BirthdayRepo GetBirthdayFromDate]", err, "Error when retrieving birthdays")
 	}
@@ -65,12 +64,21 @@ func (b *BirthdayRepo) GetBirthdaysFromDate(date uint, maxAmount uint) ([]port.B
 		portBirthdays = append(portBirthdays, portBirthday)
 	}
 
-	if !(len(modelBirthdays) < int(maxAmount)) {
+	firstFetchedAmount := len(modelBirthdays)
+	if !(firstFetchedAmount < int(maxAmount)) {
 		return portBirthdays, nil
 	}
 
+	// Second fetch for start of the year, if we didn't get enough birthdays
+	var amountOfBirthdaysAfterDate int64
+	err = b.db.Model(&model.Birthday{}).Where("birthday_date >= ?", date).Count(&amountOfBirthdaysAfterDate).Error
+	if err != nil {
+		return nil, util.NewErrorWithDisplay("[BirthdayRepo GetBirthdayFromDate]", err, "Error when counting amount of birthdays")
+	}
+
 	modelBirthdays = modelBirthdays[:0]
-	err = b.db.Limit(int(maxAmount)-len(modelBirthdays)).Order("birthday_date ASC, discord_id ASC").Where("birthday_date < ?", date).Find(&modelBirthdays).Error
+
+	err = b.db.Offset(int(page*maxAmount)-int(amountOfBirthdaysAfterDate)+firstFetchedAmount).Limit(int(maxAmount)-firstFetchedAmount).Order("birthday_date ASC, discord_id ASC").Where("birthday_date < ?", date).Find(&modelBirthdays).Error
 	if err != nil {
 		return nil, util.NewErrorWithDisplay("[BirthdayRepo GetBirthdayFromDate]", err, "Error when retrieving birthdays")
 	}
@@ -114,4 +122,14 @@ func (b *BirthdayRepo) GetBirthdaysOnDate(date uint) ([]port.Birthday, util.Roma
 	}
 
 	return portBirthdays, nil
+}
+
+func (b *BirthdayRepo) GetTotalBirthdayCount() (int, util.RomanError) {
+	var totalBirthdayCount int64
+	err := b.db.Model(model.Birthday{}).Count(&totalBirthdayCount).Error
+	if err != nil {
+		return 0, util.NewErrorWithDisplay("[BirthdayRepo GetTotalBirthdayCount]", err, "Error when retrieving birthday count")
+	}
+
+	return int(totalBirthdayCount), nil
 }

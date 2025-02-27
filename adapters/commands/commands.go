@@ -3,29 +3,28 @@ package commands
 import (
 	api "github.com/SnakeTwix/gosu-api"
 	"github.com/disgoorg/disgo/discord"
-	"github.com/disgoorg/disgo/events"
 	"roman/port"
 	"roman/util"
 )
 
-type Commands struct {
-	commands map[string]Command
+type SlashCommands struct {
+	commands map[string]SlashCommand
 }
 
-func Init(osuApi *api.Client, birthdayService port.BirthdayService) *Commands {
-	manager := Commands{}
+func InitSlashCommands(osuApi *api.Client, birthdayService port.BirthdayService) *SlashCommands {
+	manager := SlashCommands{}
 
-	commands := map[string]Command{
-		NamePing:          Ping{},
-		NameCreateTourney: CreateTourney{},
-		NameParseLobby: ParseLobby{
+	commands := map[string]SlashCommand{
+		SlashPing:          Ping{},
+		SlashCreateTourney: CreateTourney{},
+		SlashParseLobby: ParseLobby{
 			// TODO: Add ports for future mocking
 			osuApi: osuApi,
 		},
-		NameSetBd: SetBd{
+		SlashSetBd: SetBd{
 			birthdayService: birthdayService,
 		},
-		NameNearBd: NearBd{
+		SlashNearBd: NearBd{
 			birthdayService: birthdayService,
 		},
 	}
@@ -35,19 +34,36 @@ func Init(osuApi *api.Client, birthdayService port.BirthdayService) *Commands {
 	return &manager
 }
 
-func (c *Commands) GetAll() map[string]Command {
+func (c *SlashCommands) GetAll() map[string]SlashCommand {
 	return c.commands
 }
 
-type Command interface {
+func (c *SlashCommands) GetHandlers() map[string]Handler {
+	handlers := map[string]Handler{}
+	for name, command := range c.commands {
+		handlers[name] = command
+	}
+
+	return handlers
+}
+
+type Handler interface {
+	Handle(e any) util.RomanError
+}
+
+type Infoer interface {
 	Info() discord.SlashCommandCreate
-	Handler(*events.ApplicationCommandInteractionCreate) util.RomanError
+}
+
+type SlashCommand interface {
+	Handler
+	Infoer
 }
 
 const (
-	NamePing          = "ping"
-	NameCreateTourney = "create-tourney"
-	NameParseLobby    = "parse-lobby"
-	NameSetBd         = "set-bd"
-	NameNearBd        = "near-bd"
+	SlashPing          = "ping"
+	SlashCreateTourney = "create-tourney"
+	SlashParseLobby    = "parse-lobby"
+	SlashSetBd         = "set-bd"
+	SlashNearBd        = "near-bd"
 )

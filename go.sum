@@ -6,6 +6,8 @@ github.com/disgoorg/disgo v0.18.12 h1:bB4bgJ9KEyJ+vKfa/fYEwEYv8Ds3C8RUoavotF2xHx
 github.com/disgoorg/disgo v0.18.12/go.mod h1:wZ/ZW6x43QivIVrYrJxwSeFbIbrMqpi5vAU1ovsod8o=
 github.com/disgoorg/json v1.2.0 h1:6e/j4BCfSHIvucG1cd7tJPAOp1RgnnMFSqkvZUtEd1Y=
 github.com/disgoorg/json v1.2.0/go.mod h1:BHDwdde0rpQFDVsRLKhma6Y7fTbQKub/zdGO5O9NqqA=
+github.com/disgoorg/paginator v0.0.0-20240725182907-1bdf780b5586 h1:GcdAmaZYq/iHmeV8iSPEeN1JHB3dgfq6EcujSsHfZFg=
+github.com/disgoorg/paginator v0.0.0-20240725182907-1bdf780b5586/go.mod h1:6dmOx00CV/GNYip5FZbe9k2mw39trmpdY6meXdCrfrw=
 github.com/disgoorg/snowflake/v2 v2.0.3 h1:3B+PpFjr7j4ad7oeJu4RlQ+nYOTadsKapJIzgvSI2Ro=
 github.com/disgoorg/snowflake/v2 v2.0.3/go.mod h1:W6r7NUA7DwfZLwr00km6G4UnZ0zcoLBRufhkFWgAc4c=
 github.com/go-co-op/gocron/v2 v2.15.0 h1:Kpvo71VSihE+RImmpA+3ta5CcMhoRzMGw4dJawrj4zo=

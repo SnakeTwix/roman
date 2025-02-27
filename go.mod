@@ -15,6 +15,7 @@ require (
 
 require (
 	github.com/disgoorg/json v1.2.0 // indirect
+	github.com/disgoorg/paginator v0.0.0-20240725182907-1bdf780b5586 // indirect
 	github.com/google/uuid v1.6.0 // indirect
 	github.com/gorilla/websocket v1.5.3 // indirect
 	github.com/jinzhu/inflection v1.0.0 // indirect

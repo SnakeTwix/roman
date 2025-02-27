@@ -15,7 +15,7 @@ type CreateTourney struct{}
 
 func (c CreateTourney) Info() discord.SlashCommandCreate {
 	return discord.SlashCommandCreate{
-		Name:        NameCreateTourney,
+		Name:        SlashCreateTourney,
 		Description: "Creates basic template for a tourney",
 		Options: []discord.ApplicationCommandOption{
 			discord.ApplicationCommandOptionString{
@@ -31,13 +31,18 @@ func (c CreateTourney) Info() discord.SlashCommandCreate {
 	}
 }
 
-func (c CreateTourney) Handler(e *events.ApplicationCommandInteractionCreate) util.RomanError {
-	data := e.SlashCommandInteractionData()
+func (c CreateTourney) Handle(e any) util.RomanError {
+	interaction, ok := e.(*events.ApplicationCommandInteractionCreate)
+	if !ok {
+		return util.NewErrorWithDisplay("[CreateTourney Handler]", errors.New("failed to convert discord event to ApplicationCommandInteractionCreate"), "Couldn't find embed")
+	}
+
+	data := interaction.SlashCommandInteractionData()
 	tourneyName := data.String("tourney_name")
 	teamName := data.String("team_name")
 
-	guilds := rest.NewGuilds(e.Client().Rest())
-	guildId := *e.GuildID()
+	guilds := rest.NewGuilds(interaction.Client().Rest())
+	guildId := *interaction.GuildID()
 
 	guildChannels, baseErr := guilds.GetGuildChannels(guildId)
 	if baseErr != nil {
@@ -45,7 +50,7 @@ func (c CreateTourney) Handler(e *events.ApplicationCommandInteractionCreate) ut
 	}
 
 	var err util.RomanError
-	// Set the context at the end of the function when stuff exits
+	// Set the context at the end of the function when everything exits
 	defer func() {
 		if err != nil {
 			err.WriteCurrentContext("[CreateTourney Handler]")
@@ -87,7 +92,7 @@ func (c CreateTourney) Handler(e *events.ApplicationCommandInteractionCreate) ut
 		return err
 	}
 
-	selectMenu := discord.NewUserSelectMenu(util.CreateUserSelectId(role.ID, e.User().ID), "Select users").
+	selectMenu := discord.NewUserSelectMenu(util.CreateUserSelectId(role.ID, interaction.User().ID), "Select users").
 		WithMinValues(2).
 		WithMaxValues(12)
 
@@ -96,7 +101,7 @@ func (c CreateTourney) Handler(e *events.ApplicationCommandInteractionCreate) ut
 		SetEphemeral(true).
 		Build()
 
-	return util.NewErrorWithDisplay("[CreateTourney Handler]", e.CreateMessage(message), "Failed to send select menu for players")
+	return util.NewErrorWithDisplay("[CreateTourney Handler]", interaction.CreateMessage(message), "Failed to send select menu for players")
 }
 
 func (c CreateTourney) createRole(guilds rest.Guilds, guildId snowflake.ID, tourneyName string, teamName string) (*discord.Role, util.RomanError) {

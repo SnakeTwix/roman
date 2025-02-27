@@ -1,27 +1,17 @@
 package events
 
 import (
-	"roman/util"
-	"roman/util/enum"
+	"github.com/disgoorg/disgo/bot"
+	"roman/adapters/commands"
 )
 
-var events = map[string]Event{
-	enum.SelectMenuUserRolesId: TourneyRoles{},
+func Register(events []Event, client bot.Client) {
+	for _, event := range events {
+		event.Register(client)
+	}
 }
-
-func GetAll() map[string]Event {
-	// uhh, add init logic if it ever needs to happen. Overall, this is fine currently
-	return events
-}
-
-//func Get(name string) (Event, error) {
-//	event, ok := events[name]
-//	if !ok {
-//
-//	}
-//}
 
 type Event interface {
-	// Handler generalizing is kind of impossible here. Handlers should check what event they get themselves
-	Handler(event any) util.RomanError
+	AssociatedHandlers() map[string]commands.Handler
+	Register(client bot.Client)
 }

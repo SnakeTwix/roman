@@ -17,7 +17,7 @@ type ParseLobby struct {
 
 func (c ParseLobby) Info() discord.SlashCommandCreate {
 	return discord.SlashCommandCreate{
-		Name:        NameParseLobby,
+		Name:        SlashParseLobby,
 		Description: "Parses the multi lobby and spits out semicolon separated values of scores per player",
 		Options: []discord.ApplicationCommandOption{
 			discord.ApplicationCommandOptionString{
@@ -29,8 +29,13 @@ func (c ParseLobby) Info() discord.SlashCommandCreate {
 	}
 }
 
-func (c ParseLobby) Handler(e *events.ApplicationCommandInteractionCreate) util.RomanError {
-	data := e.SlashCommandInteractionData()
+func (c ParseLobby) Handle(e any) util.RomanError {
+	interaction, ok := e.(*events.ApplicationCommandInteractionCreate)
+	if !ok {
+		return util.NewErrorWithDisplay("[ParseLobby Handler]", errors.New("failed to convert discord event to ApplicationCommandInteractionCreate"), "Couldn't find embed")
+	}
+
+	data := interaction.SlashCommandInteractionData()
 	lobbyLink := data.String("lobby_link")
 	linkSplit := strings.Split(lobbyLink, "/")
 	lobbyIdString := linkSplit[len(linkSplit)-1]
@@ -113,5 +118,5 @@ func (c ParseLobby) Handler(e *events.ApplicationCommandInteractionCreate) util.
 		SetContent(builder.String()).
 		Build()
 
-	return util.NewErrorWithDisplay("[ParseLobby Handler]", e.CreateMessage(message), "Failed to send lobby stats")
+	return util.NewErrorWithDisplay("[ParseLobby Handler]", interaction.CreateMessage(message), "Failed to send lobby stats")
 }

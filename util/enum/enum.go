@@ -1,5 +1,6 @@
 package enum
 
 const (
-	SelectMenuUserRolesId = "usersRoles"
+	SelectMenuUserRolesId  = "usersRoles"
+	ChangeBdEmbedPaginator = "changeBdEmbedPaginator"
 )

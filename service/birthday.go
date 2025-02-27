@@ -11,6 +11,10 @@ type BirthdayService struct {
 	birthdayRepo port.BirthdayRepo
 }
 
+func (b *BirthdayService) GetTotalBirthdayCount() (int, util.RomanError) {
+	return b.birthdayRepo.GetTotalBirthdayCount()
+}
+
 func (b *BirthdayService) GetBirthdaysOnDate(date uint) ([]port.Birthday, util.RomanError) {
 	birthdays, err := b.birthdayRepo.GetBirthdaysOnDate(date)
 	return birthdays, err
@@ -33,7 +37,7 @@ func (b *BirthdayService) SetBd(discordId uint, date uint, year uint) util.Roman
 	return util.NewError("[BirthdayService SetBd]", b.birthdayRepo.SetBd(discordId, date, year))
 }
 
-func (b *BirthdayService) GetBirthdaysFromDate(date uint, maxAmount uint) ([]port.Birthday, util.RomanError) {
-	birthdays, err := b.birthdayRepo.GetBirthdaysFromDate(date, maxAmount)
+func (b *BirthdayService) GetBirthdaysFromDate(date uint, page uint, maxAmount uint) ([]port.Birthday, util.RomanError) {
+	birthdays, err := b.birthdayRepo.GetBirthdaysFromDate(date, page-1, maxAmount)
 	return birthdays, err
 }

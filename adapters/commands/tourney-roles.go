@@ -1,4 +1,4 @@
-package events
+package commands
 
 import (
 	"errors"
@@ -12,7 +12,7 @@ import (
 
 type TourneyRoles struct{}
 
-func (c TourneyRoles) Handler(e any) util.RomanError {
+func (c TourneyRoles) Handle(e any) util.RomanError {
 	interaction, ok := e.(*discordEvents.ComponentInteractionCreate)
 	if !ok {
 		return util.NewErrorWithDisplay("[TourneyRoles Handler]", errors.New("failed to convert discord event to ComponentInteractionCreate"), "Couldn't find embed")
@@ -40,7 +40,7 @@ func (c TourneyRoles) Handler(e any) util.RomanError {
 		message.WriteString("")
 	}
 
-	message.WriteString(": You've been added to a team!")
+	message.WriteString("\nYou've been added to a team!")
 	discordMessage := discord.NewMessageCreateBuilder().SetContent(message.String()).Build()
 
 	return util.NewErrorWithDisplay("[TourneyRoles Handler]", interaction.CreateMessage(discordMessage), "Failed to send message")
