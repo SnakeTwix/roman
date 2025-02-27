@@ -36,9 +36,10 @@ func (s NearBd) Handle(e any) util.RomanError {
 	}
 
 	var messageContent strings.Builder
+	todayZeroed := time.Date(currentTime.Year(), currentTime.Month(), currentTime.Day(), 0, 0, 0, 0, time.Local)
 	for _, birthday := range birthdays {
 		date := time.Date(time.Now().Year(), time.Month(birthday.Date/100), int(birthday.Date%100), 12, 0, 0, 0, time.UTC)
-		if time.Now().AddDate(0, 0, 1).After(date) {
+		if todayZeroed.After(date) {
 			date = date.AddDate(1, 0, 0)
 		}
 
